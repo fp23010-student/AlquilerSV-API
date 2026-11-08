@@ -84,4 +84,22 @@ impl CouchClient {
         let body = parse(r).await?;
         Ok(body["docs"].clone())
     }
+
+        /// Cambios desde un punto (since="0" trae todo).
+    pub async fn changes(&self, since: &str) -> Result<Value, CouchError> {
+        let r = self.http.get(self.url("_changes"))
+            .basic_auth(&self.user, Some(&self.pass))
+            .query(&[("include_docs", "true"), ("since", since)])
+            .send().await?;
+        parse(r).await
+    }
+
+    /// Guarda varios documentos de una sola vez.
+    pub async fn bulk_docs(&self, docs: &Value) -> Result<Value, CouchError> {
+        let r = self.http.post(self.url("_bulk_docs"))
+            .basic_auth(&self.user, Some(&self.pass))
+            .json(&json!({"docs": docs}))
+            .send().await?;
+        parse(r).await
+    }
 }

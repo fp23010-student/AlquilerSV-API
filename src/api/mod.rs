@@ -1,5 +1,6 @@
 mod crud;
 mod pagos;
+mod sync;
 
 use crate::domain::*;
 use crate::infrastructure::couch::CouchClient;
@@ -34,6 +35,8 @@ pub fn router(couch: Arc<CouchClient>) -> Router {
         .route("/pagos/atrasados", get(pagos::atrasados))
         .route("/pagos/:id/pagar", post(pagos::pagar))
         .route("/reportes/atraso-promedio", get(pagos::reporte_atraso))
+        .route("/sync/pull", get(sync::pull))
+        .route("/sync/push", post(sync::push))
         .with_state(couch)
 }
 
