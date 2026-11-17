@@ -1,0 +1,2 @@
+    Checking alquileres-api v0.1.0 (/home/hamil/ZedProjects/alquileres-api)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.50s

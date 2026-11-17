@@ -1,15 +1,76 @@
+name: alquileres_sv
+
 services:
   couchdb:
     image: couchdb:3.3
-    container_name: alquileres_couchdb
+    container_name: sv_couchdb
     restart: unless-stopped
-    ports:
-      - "5985:5984"
     environment:
       COUCHDB_USER: admin
       COUCHDB_PASSWORD: admin123
+    ports:
+      - "5985:5984"
     volumes:
       - couchdb_data:/opt/couchdb/data
+    networks: [red_datos]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5984/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  init:
+    image: curlimages/curl:8.10.1
+    depends_on:
+      couchdb:
+        condition: service_healthy
+    environment:
+      COUCH_URL: http://admin:admin123@couchdb:5984
+    volumes:
+      - ./init_couchdb.sh:/init_couchdb.sh:ro
+    entrypoint: ["sh", "/init_couchdb.sh"]
+    networks: [red_datos]
+    restart: "no"
+
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: sv_api
+    restart: unless-stopped
+    depends_on:
+      couchdb:
+        condition: service_healthy
+      init:
+        condition: service_completed_successfully
+    environment:
+      COUCHDB_URL: http://couchdb:5984
+      COUCHDB_USER: api_sv
+      COUCHDB_PASSWORD: api123
+      COUCHDB_DB: alquileres_p001
+    ports:
+      - "8080:8080"
+    networks: [red_datos, red_cliente]
+
+  cliente:
+    build: ./cliente
+    profiles: ["pruebas"]
+    user: root
+    cap_add: [NET_ADMIN]
+    depends_on: [api]
+    environment:
+      API_URL: http://api:8080
+    entrypoint: ["sh", "/scripts/correr.sh"]
+    volumes:
+      - ./k6:/scripts:ro
+      - ./resultados:/resultados
+    networks: [red_cliente]
+
+networks:
+  red_datos:
+    name: sv_red_datos
+  red_cliente:
+    name: sv_red_cliente
 
 volumes:
   couchdb_data:

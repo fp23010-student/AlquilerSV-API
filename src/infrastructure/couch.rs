@@ -47,7 +47,7 @@ impl CouchClient {
     }
 
     fn url(&self, path: &str) -> String {
-        return format!("{}/{}/{}", self.base_url, self.db, path);
+        format!("{}/{}/{}", self.base_url, self.db, path)
     }
 
     pub async fn info(&self) -> Result<Value, CouchError> {

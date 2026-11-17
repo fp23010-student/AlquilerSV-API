@@ -1,0 +1,15 @@
+== 1. El auditor (rol lector) puede leer
+{"total_rows":5,"offset":0,"rows":[
+{"id":"_design/00f5fbc96f8fe615a6d21d8243ed6b1ab4e1d174","key":"_design/00f5fbc96f8fe615a6d21d8243ed6b1ab4e1d174","value":{"rev":"1-63387213e530e338c33e6e9ee07e69b8"}},
+{"id":"_design/10d904dfd7d02175e12a5656bdca06ce6dbfda55","key":"_design/10d904dfd7d02175e12a5656bdca06ce6dbfda55","value":{"rev":"1-37eadc0f439e982383be24e18d4b5be6"}},
+{"id":"_design/5cb7e53c7fc48e965e9df05bf3c58af9bf94f7f2","key":"_design/5cb7e53c7fc48e965e9df05bf3c58af9bf94f7f2","value":{"rev":"1-42cb8fc4e2210d189b2bc1481c3bf022"}},
+{"id":"_design/ab969f007389d17ac522f519da16987479da3281","key":"_design/ab969f007389d17ac522f519da16987479da3281","value":{"rev":"1-2d1d88ce64289b5c28bfc28f33ea5766"}},
+{"id":"_design/validaciones","key":"_design/validaciones","value":{"rev":"1-cae976376d38b9baaea05d6a3e141470"}}
+]}
+
+== 2. El auditor NO puede escribir
+{"error":"unauthorized","reason":"solo el rol api puede escribir"}
+
+== 3. Sin credenciales no entra
+{"error":"unauthorized","reason":"You are not authorized to access this db."}
+

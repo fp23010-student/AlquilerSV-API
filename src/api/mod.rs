@@ -4,9 +4,11 @@ mod sync;
 
 use crate::domain::*;
 use crate::infrastructure::couch::CouchClient;
+use crate::telemetry::{self, Metricas};
 use axum::{
     extract::State,
     http::StatusCode,
+    middleware,
     routing::{get, post},
     Json, Router,
 };
@@ -23,8 +25,8 @@ fn recurso<T: Entidad>(ruta: &str) -> Router<Arc<CouchClient>> {
         )
 }
 
-pub fn router(couch: Arc<CouchClient>) -> Router {
-    Router::new()
+pub fn router(couch: Arc<CouchClient>, metricas: Arc<Metricas>) -> Router {
+    let principal = Router::new()
         .route("/health", get(health))
         .merge(recurso::<Propietario>("/propietarios"))
         .merge(recurso::<Inmueble>("/inmuebles"))
@@ -37,7 +39,14 @@ pub fn router(couch: Arc<CouchClient>) -> Router {
         .route("/reportes/atraso-promedio", get(pagos::reporte_atraso))
         .route("/sync/pull", get(sync::pull))
         .route("/sync/push", post(sync::push))
-        .with_state(couch)
+        .route_layer(middleware::from_fn_with_state(metricas.clone(), telemetry::medir))
+        .with_state(couch);
+
+    let telemetria = Router::new()
+        .route("/metrics", get(telemetry::reporte))
+        .with_state(metricas);
+
+    principal.merge(telemetria)
 }
 
 async fn health(
